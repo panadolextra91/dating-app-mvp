@@ -16,9 +16,9 @@ export class LikeService {
   ) {}
 
   async create(dto: CreateLikeDto): Promise<{ like: Like; match?: Match }> {
-    await this.verifyUsersExist(dto.fromUserId, dto.toUserId);
-
     return this.prisma.$transaction(async (tx) => {
+      await this.verifyUsersExist(tx, dto.fromUserId, dto.toUserId);
+
       const like = await this.createLike(tx, dto);
       const match = await this.checkAndCreateMatch(tx, dto);
 
@@ -34,12 +34,13 @@ export class LikeService {
   }
 
   private async verifyUsersExist(
+    tx: Prisma.TransactionClient,
     fromUserId: string,
     toUserId: string,
   ): Promise<void> {
     const [fromUser, toUser] = await Promise.all([
-      this.prisma.user.findUnique({ where: { id: fromUserId } }),
-      this.prisma.user.findUnique({ where: { id: toUserId } }),
+      tx.user.findUnique({ where: { id: fromUserId } }),
+      tx.user.findUnique({ where: { id: toUserId } }),
     ]);
 
     if (!fromUser) throw new NotFoundException('From user not found');

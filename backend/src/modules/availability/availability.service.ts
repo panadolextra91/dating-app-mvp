@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Availability } from '@prisma/client';
+import { Availability, Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateAvailabilityDto } from './dto/create-availability.dto';
 
@@ -12,31 +12,39 @@ export class AvailabilityService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(dto: CreateAvailabilityDto): Promise<Availability> {
-    const user = await this.prisma.user.findUnique({
-      where: { id: dto.userId },
-    });
+    return this.prisma.$transaction(
+      async (tx) => {
+        const user = await tx.user.findUnique({
+          where: { id: dto.userId },
+        });
 
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
+        if (!user) {
+          throw new NotFoundException('User not found');
+        }
 
-    await this.checkOverlap(dto);
+        await this.checkOverlap(tx, dto);
 
-    return this.prisma.availability.create({
-      data: {
-        userId: dto.userId,
-        startTime: new Date(dto.startTime),
-        endTime: new Date(dto.endTime),
+        return tx.availability.create({
+          data: {
+            userId: dto.userId,
+            startTime: new Date(dto.startTime),
+            endTime: new Date(dto.endTime),
+          },
+        });
       },
-    });
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+    );
   }
 
   async findByUserId(userId: string): Promise<Availability[]> {
     return this.prisma.availability.findMany({ where: { userId } });
   }
 
-  private async checkOverlap(dto: CreateAvailabilityDto): Promise<void> {
-    const overlap = await this.prisma.availability.findFirst({
+  private async checkOverlap(
+    tx: Prisma.TransactionClient,
+    dto: CreateAvailabilityDto,
+  ): Promise<void> {
+    const overlap = await tx.availability.findFirst({
       where: {
         userId: dto.userId,
         startTime: { lt: new Date(dto.endTime) },

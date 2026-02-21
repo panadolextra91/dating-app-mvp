@@ -1,10 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Match, Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
+import { findFirstCommonSlot } from '../../common/utils/interval.util';
 
 @Injectable()
 export class MatchService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async createMatch(
     tx: Prisma.TransactionClient,
@@ -21,7 +26,15 @@ export class MatchService {
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === 'P2002'
       ) {
-        return tx.match.findFirst({ where: { user1Id, user2Id } });
+        const existing = await tx.match.findFirst({
+          where: { user1Id, user2Id },
+        });
+        if (!existing) {
+          throw new InternalServerErrorException(
+            'Match vanished during creation',
+          );
+        }
+        return existing;
       }
       throw error;
     }
@@ -34,5 +47,34 @@ export class MatchService {
       },
       include: { user1: true, user2: true },
     });
+  }
+
+  async findCommonSlot(
+    matchId: string,
+  ): Promise<{ matchId: string; commonSlot: { start: Date; end: Date } | null }> {
+    const match = await this.prisma.match.findUnique({
+      where: { id: matchId },
+    });
+
+    if (!match) {
+      throw new NotFoundException('Match not found');
+    }
+
+    const now = new Date();
+
+    const [slotsA, slotsB] = await Promise.all([
+      this.prisma.availability.findMany({
+        where: { userId: match.user1Id, endTime: { gt: now } },
+        orderBy: { startTime: 'asc' },
+      }),
+      this.prisma.availability.findMany({
+        where: { userId: match.user2Id, endTime: { gt: now } },
+        orderBy: { startTime: 'asc' },
+      }),
+    ]);
+
+    const commonSlot = findFirstCommonSlot(slotsA, slotsB);
+
+    return { matchId, commonSlot };
   }
 }

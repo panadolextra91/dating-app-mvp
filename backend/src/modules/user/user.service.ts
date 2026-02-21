@@ -35,7 +35,21 @@ export class UserService {
     return user;
   }
 
-  async findAll(): Promise<User[]> {
-    return this.prisma.user.findMany();
+  async findAll(): Promise<Omit<User, 'email'>[]> {
+    const users = await this.prisma.user.findMany({
+      take: 20,
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        name: true,
+        age: true,
+        gender: true,
+        bio: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    return users;
   }
 }

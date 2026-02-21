@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { NotFoundException } from '@nestjs/common';
 import { MatchService } from './match.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
@@ -12,6 +13,10 @@ const mockTx = {
 
 const mockPrismaService = {
   match: {
+    findMany: jest.fn(),
+    findUnique: jest.fn(),
+  },
+  availability: {
     findMany: jest.fn(),
   },
 };
@@ -86,7 +91,6 @@ describe('MatchService', () => {
     it('should query matches where user is user1 or user2', async () => {
       const matches = [
         { id: 'm1', user1Id: 'user-a', user2Id: 'user-b' },
-        { id: 'm2', user1Id: 'user-c', user2Id: 'user-a' },
       ];
 
       mockPrismaService.match.findMany.mockResolvedValue(matches);
@@ -100,6 +104,74 @@ describe('MatchService', () => {
         include: { user1: true, user2: true },
       });
       expect(result).toEqual(matches);
+    });
+  });
+
+  describe('findCommonSlot', () => {
+    it('should throw NotFoundException when match not found', async () => {
+      mockPrismaService.match.findUnique.mockResolvedValue(null);
+
+      await expect(service.findCommonSlot('nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('should return commonSlot when users have overlapping availability', async () => {
+      mockPrismaService.match.findUnique.mockResolvedValue({
+        id: 'match-1',
+        user1Id: 'user-a',
+        user2Id: 'user-b',
+      });
+
+      mockPrismaService.availability.findMany
+        .mockResolvedValueOnce([
+          {
+            startTime: new Date('2026-03-01T09:00:00Z'),
+            endTime: new Date('2026-03-01T11:00:00Z'),
+          },
+        ])
+        .mockResolvedValueOnce([
+          {
+            startTime: new Date('2026-03-01T10:00:00Z'),
+            endTime: new Date('2026-03-01T12:00:00Z'),
+          },
+        ]);
+
+      const result = await service.findCommonSlot('match-1');
+
+      expect(result).toEqual({
+        matchId: 'match-1',
+        commonSlot: {
+          start: new Date('2026-03-01T10:00:00Z'),
+          end: new Date('2026-03-01T11:00:00Z'),
+        },
+      });
+    });
+
+    it('should return null commonSlot when no overlap', async () => {
+      mockPrismaService.match.findUnique.mockResolvedValue({
+        id: 'match-1',
+        user1Id: 'user-a',
+        user2Id: 'user-b',
+      });
+
+      mockPrismaService.availability.findMany
+        .mockResolvedValueOnce([
+          {
+            startTime: new Date('2026-03-01T09:00:00Z'),
+            endTime: new Date('2026-03-01T10:00:00Z'),
+          },
+        ])
+        .mockResolvedValueOnce([
+          {
+            startTime: new Date('2026-03-01T14:00:00Z'),
+            endTime: new Date('2026-03-01T15:00:00Z'),
+          },
+        ]);
+
+      const result = await service.findCommonSlot('match-1');
+
+      expect(result).toEqual({ matchId: 'match-1', commonSlot: null });
     });
   });
 });

@@ -1,4 +1,11 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Post,
+} from '@nestjs/common';
 import { AvailabilityService } from './availability.service';
 import { CreateAvailabilityDto } from './dto/create-availability.dto';
 
@@ -12,7 +19,7 @@ export class AvailabilityController {
   }
 
   @Get(':userId')
-  findByUserId(@Param('userId') userId: string) {
+  findByUserId(@Param('userId', ParseUUIDPipe) userId: string) {
     return this.availabilityService.findByUserId(userId);
   }
 }
