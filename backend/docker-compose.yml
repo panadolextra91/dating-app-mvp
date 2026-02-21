@@ -1,0 +1,18 @@
+name: dating-app-mvp
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: dating-app-mvp
+    environment:
+      POSTGRES_DB: dating_app
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password123
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  pgdata:
