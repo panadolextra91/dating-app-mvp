@@ -3,15 +3,21 @@ import { ConflictException, NotFoundException } from '@nestjs/common';
 import { AvailabilityService } from './availability.service';
 import { PrismaService } from '../../prisma/prisma.service';
 
-const mockPrismaService = {
+const mockTx = {
   user: {
     findUnique: jest.fn(),
   },
   availability: {
-    create: jest.fn(),
-    findMany: jest.fn(),
     findFirst: jest.fn(),
+    create: jest.fn(),
   },
+};
+
+const mockPrismaService = {
+  availability: {
+    findMany: jest.fn(),
+  },
+  $transaction: jest.fn((fn) => fn(mockTx)),
 };
 
 describe('AvailabilityService', () => {
@@ -27,6 +33,7 @@ describe('AvailabilityService', () => {
 
     service = module.get<AvailabilityService>(AvailabilityService);
     jest.clearAllMocks();
+    mockPrismaService.$transaction.mockImplementation((fn) => fn(mockTx));
   });
 
   it('should create availability successfully', async () => {
@@ -35,16 +42,11 @@ describe('AvailabilityService', () => {
       startTime: '2026-03-01T09:00:00Z',
       endTime: '2026-03-01T10:00:00Z',
     };
-    const expected = {
-      id: 'avail-1',
-      userId: dto.userId,
-      startTime: new Date(dto.startTime),
-      endTime: new Date(dto.endTime),
-    };
+    const expected = { id: 'avail-1', ...dto };
 
-    mockPrismaService.user.findUnique.mockResolvedValue({ id: 'user-1' });
-    mockPrismaService.availability.findFirst.mockResolvedValue(null);
-    mockPrismaService.availability.create.mockResolvedValue(expected);
+    mockTx.user.findUnique.mockResolvedValue({ id: 'user-1' });
+    mockTx.availability.findFirst.mockResolvedValue(null);
+    mockTx.availability.create.mockResolvedValue(expected);
 
     const result = await service.create(dto);
     expect(result).toEqual(expected);
@@ -57,7 +59,7 @@ describe('AvailabilityService', () => {
       endTime: '2026-03-01T10:00:00Z',
     };
 
-    mockPrismaService.user.findUnique.mockResolvedValue(null);
+    mockTx.user.findUnique.mockResolvedValue(null);
 
     await expect(service.create(dto)).rejects.toThrow(NotFoundException);
   });
@@ -68,16 +70,18 @@ describe('AvailabilityService', () => {
       startTime: '2026-03-01T09:30:00Z',
       endTime: '2026-03-01T10:30:00Z',
     };
-    const existingSlot = {
-      id: 'avail-existing',
-      userId: 'user-1',
-      startTime: new Date('2026-03-01T09:00:00Z'),
-      endTime: new Date('2026-03-01T10:00:00Z'),
-    };
 
-    mockPrismaService.user.findUnique.mockResolvedValue({ id: 'user-1' });
-    mockPrismaService.availability.findFirst.mockResolvedValue(existingSlot);
+    mockTx.user.findUnique.mockResolvedValue({ id: 'user-1' });
+    mockTx.availability.findFirst.mockResolvedValue({ id: 'existing' });
 
     await expect(service.create(dto)).rejects.toThrow(ConflictException);
+  });
+
+  it('should return availabilities by userId', async () => {
+    const avails = [{ id: 'avail-1', userId: 'user-1' }];
+    mockPrismaService.availability.findMany.mockResolvedValue(avails);
+
+    const result = await service.findByUserId('user-1');
+    expect(result).toEqual(avails);
   });
 });

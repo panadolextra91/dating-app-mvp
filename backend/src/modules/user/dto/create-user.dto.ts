@@ -4,15 +4,11 @@ import {
   IsInt,
   IsOptional,
   IsString,
+  Max,
   Min,
   MinLength,
 } from 'class-validator';
-
-enum Gender {
-  MALE = 'MALE',
-  FEMALE = 'FEMALE',
-  OTHER = 'OTHER',
-}
+import { Gender } from '@prisma/client';
 
 export class CreateUserDto {
   @IsEmail()
@@ -24,6 +20,7 @@ export class CreateUserDto {
 
   @IsInt()
   @Min(18, { message: 'Age must be at least 18' })
+  @Max(120, { message: 'Age must be at most 120' })
   age: number;
 
   @IsEnum(Gender)

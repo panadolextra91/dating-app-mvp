@@ -6,6 +6,9 @@ import { MatchService } from '../match/match.service';
 import { Prisma } from '@prisma/client';
 
 const mockTx = {
+  user: {
+    findUnique: jest.fn(),
+  },
   like: {
     create: jest.fn(),
     findUnique: jest.fn(),
@@ -13,9 +16,6 @@ const mockTx = {
 };
 
 const mockPrismaService = {
-  user: {
-    findUnique: jest.fn(),
-  },
   like: {
     findMany: jest.fn(),
   },
@@ -47,7 +47,7 @@ describe('LikeService', () => {
     const dto = { fromUserId: 'user-a', toUserId: 'user-b' };
     const like = { id: 'like-1', ...dto, createdAt: new Date() };
 
-    mockPrismaService.user.findUnique.mockResolvedValue({ id: 'any' });
+    mockTx.user.findUnique.mockResolvedValue({ id: 'any' });
     mockTx.like.create.mockResolvedValue(like);
     mockTx.like.findUnique.mockResolvedValue(null);
 
@@ -63,7 +63,7 @@ describe('LikeService', () => {
       clientVersion: '5.0.0',
     });
 
-    mockPrismaService.user.findUnique.mockResolvedValue({ id: 'any' });
+    mockTx.user.findUnique.mockResolvedValue({ id: 'any' });
     mockTx.like.create.mockRejectedValue(prismaError);
 
     await expect(service.create(dto)).rejects.toThrow(ConflictException);
@@ -72,7 +72,7 @@ describe('LikeService', () => {
   it('should throw NotFoundException when user not found', async () => {
     const dto = { fromUserId: 'nonexistent', toUserId: 'user-b' };
 
-    mockPrismaService.user.findUnique
+    mockTx.user.findUnique
       .mockResolvedValueOnce(null)
       .mockResolvedValueOnce({ id: 'user-b' });
 
@@ -94,7 +94,7 @@ describe('LikeService', () => {
       createdAt: new Date(),
     };
 
-    mockPrismaService.user.findUnique.mockResolvedValue({ id: 'any' });
+    mockTx.user.findUnique.mockResolvedValue({ id: 'any' });
     mockTx.like.create.mockResolvedValue(like);
     mockTx.like.findUnique.mockResolvedValue(mutualLike);
     mockMatchService.createMatch.mockResolvedValue(match);
@@ -124,7 +124,7 @@ describe('LikeService', () => {
   it('should rethrow non-P2002 errors on createLike', async () => {
     const dto = { fromUserId: 'user-a', toUserId: 'user-b' };
 
-    mockPrismaService.user.findUnique.mockResolvedValue({ id: 'any' });
+    mockTx.user.findUnique.mockResolvedValue({ id: 'any' });
     mockTx.like.create.mockRejectedValue(new Error('DB down'));
 
     await expect(service.create(dto)).rejects.toThrow('DB down');

@@ -1,4 +1,11 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Post,
+} from '@nestjs/common';
 import { LikeService } from './like.service';
 import { CreateLikeDto } from './dto/create-like.dto';
 
@@ -12,7 +19,7 @@ export class LikeController {
   }
 
   @Get('from/:userId')
-  findByFromUserId(@Param('userId') userId: string) {
+  findByFromUserId(@Param('userId', ParseUUIDPipe) userId: string) {
     return this.likeService.findByFromUserId(userId);
   }
 }

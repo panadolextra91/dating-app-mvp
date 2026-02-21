@@ -28,8 +28,6 @@ model User {
   matchesAsUser1 Match[]        @relation("MatchUser1")
   matchesAsUser2 Match[]        @relation("MatchUser2")
   availabilities Availability[]
-
-  @@index([email])
 }
 
 model Like {
@@ -42,6 +40,7 @@ model Like {
   toUser   User @relation("ReceivedLikes", fields: [toUserId], references: [id], onDelete: Cascade)
 
   @@unique([fromUserId, toUserId])
+  @@index([toUserId])
 }
 
 model Match {
