@@ -7,7 +7,9 @@ export class CreateAvailabilityDto {
   userId: string;
 
   @IsDateString()
-  @IsWithinNextWeeks(3, { message: 'startTime must be within the next 3 weeks' })
+  @IsWithinNextWeeks(3, {
+    message: 'startTime must be within the next 3 weeks',
+  })
   startTime: string;
 
   @IsDateString()

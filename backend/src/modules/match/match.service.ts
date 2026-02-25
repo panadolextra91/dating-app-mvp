@@ -9,7 +9,7 @@ import { findFirstCommonSlot } from '../../common/utils/interval.util';
 
 @Injectable()
 export class MatchService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   async createMatch(
     tx: Prisma.TransactionClient,
@@ -49,9 +49,10 @@ export class MatchService {
     });
   }
 
-  async findCommonSlot(
-    matchId: string,
-  ): Promise<{ matchId: string; commonSlot: { start: Date; end: Date } | null }> {
+  async findCommonSlot(matchId: string): Promise<{
+    matchId: string;
+    commonSlot: { start: Date; end: Date } | null;
+  }> {
     const match = await this.prisma.match.findUnique({
       where: { id: matchId },
     });

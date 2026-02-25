@@ -242,11 +242,13 @@ describe('Dating App MVP (e2e)', () => {
     });
 
     it('POST /availabilities - overlapping slot for different user succeeds', async () => {
-      await request(app.getHttpServer()).post('/availabilities').send({
-        userId: userAId,
-        startTime: futureDate(2, 9),
-        endTime: futureDate(2, 10),
-      });
+      await request(app.getHttpServer())
+        .post('/availabilities')
+        .send({
+          userId: userAId,
+          startTime: futureDate(2, 9),
+          endTime: futureDate(2, 10),
+        });
 
       await request(app.getHttpServer())
         .post('/availabilities')
@@ -259,11 +261,13 @@ describe('Dating App MVP (e2e)', () => {
     });
 
     it('POST /availabilities - overlapping slot for SAME user returns 409', async () => {
-      await request(app.getHttpServer()).post('/availabilities').send({
-        userId: userAId,
-        startTime: futureDate(2, 9),
-        endTime: futureDate(2, 10),
-      });
+      await request(app.getHttpServer())
+        .post('/availabilities')
+        .send({
+          userId: userAId,
+          startTime: futureDate(2, 9),
+          endTime: futureDate(2, 10),
+        });
 
       await request(app.getHttpServer())
         .post('/availabilities')
@@ -287,11 +291,13 @@ describe('Dating App MVP (e2e)', () => {
     });
 
     it('GET /availabilities/:userId - returns user slots', async () => {
-      await request(app.getHttpServer()).post('/availabilities').send({
-        userId: userAId,
-        startTime: futureDate(2, 9),
-        endTime: futureDate(2, 10),
-      });
+      await request(app.getHttpServer())
+        .post('/availabilities')
+        .send({
+          userId: userAId,
+          startTime: futureDate(2, 9),
+          endTime: futureDate(2, 10),
+        });
 
       const res = await request(app.getHttpServer())
         .get(`/availabilities/${userAId}`)
@@ -332,18 +338,22 @@ describe('Dating App MVP (e2e)', () => {
 
     it('GET /matches/:matchId/common-slot - returns common slot when overlap exists', async () => {
       // A free: day+3 from 9 to 12
-      await request(app.getHttpServer()).post('/availabilities').send({
-        userId: userAId,
-        startTime: futureDate(3, 9),
-        endTime: futureDate(3, 12),
-      });
+      await request(app.getHttpServer())
+        .post('/availabilities')
+        .send({
+          userId: userAId,
+          startTime: futureDate(3, 9),
+          endTime: futureDate(3, 12),
+        });
 
       // B free: day+3 from 11 to 14
-      await request(app.getHttpServer()).post('/availabilities').send({
-        userId: userBId,
-        startTime: futureDate(3, 11),
-        endTime: futureDate(3, 14),
-      });
+      await request(app.getHttpServer())
+        .post('/availabilities')
+        .send({
+          userId: userBId,
+          startTime: futureDate(3, 11),
+          endTime: futureDate(3, 14),
+        });
 
       const res = await request(app.getHttpServer())
         .get(`/matches/${matchId}/common-slot`)
@@ -357,18 +367,22 @@ describe('Dating App MVP (e2e)', () => {
 
     it('GET /matches/:matchId/common-slot - returns null when no overlap', async () => {
       // A free: day+3 from 9 to 10
-      await request(app.getHttpServer()).post('/availabilities').send({
-        userId: userAId,
-        startTime: futureDate(3, 9),
-        endTime: futureDate(3, 10),
-      });
+      await request(app.getHttpServer())
+        .post('/availabilities')
+        .send({
+          userId: userAId,
+          startTime: futureDate(3, 9),
+          endTime: futureDate(3, 10),
+        });
 
       // B free: day+3 from 14 to 16
-      await request(app.getHttpServer()).post('/availabilities').send({
-        userId: userBId,
-        startTime: futureDate(3, 14),
-        endTime: futureDate(3, 16),
-      });
+      await request(app.getHttpServer())
+        .post('/availabilities')
+        .send({
+          userId: userBId,
+          startTime: futureDate(3, 14),
+          endTime: futureDate(3, 16),
+        });
 
       const res = await request(app.getHttpServer())
         .get(`/matches/${matchId}/common-slot`)

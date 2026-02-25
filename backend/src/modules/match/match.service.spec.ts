@@ -89,9 +89,7 @@ describe('MatchService', () => {
 
   describe('findByUserId', () => {
     it('should query matches where user is user1 or user2', async () => {
-      const matches = [
-        { id: 'm1', user1Id: 'user-a', user2Id: 'user-b' },
-      ];
+      const matches = [{ id: 'm1', user1Id: 'user-a', user2Id: 'user-b' }];
 
       mockPrismaService.match.findMany.mockResolvedValue(matches);
 
