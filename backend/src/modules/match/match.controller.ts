@@ -3,7 +3,7 @@ import { MatchService } from './match.service';
 
 @Controller('matches')
 export class MatchController {
-  constructor(private readonly matchService: MatchService) { }
+  constructor(private readonly matchService: MatchService) {}
 
   @Get('user/:userId')
   findByUserId(@Param('userId', ParseUUIDPipe) userId: string) {
