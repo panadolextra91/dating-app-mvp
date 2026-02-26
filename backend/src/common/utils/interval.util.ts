@@ -1,6 +1,6 @@
 export interface TimeSlot {
-    startTime: Date;
-    endTime: Date;
+  startTime: Date;
+  endTime: Date;
 }
 
 /**
@@ -10,40 +10,43 @@ export interface TimeSlot {
  * @returns The exact overlapped period { start, end } or null if no overlap.
  */
 export function findFirstCommonSlot(
-    slotsA: TimeSlot[],
-    slotsB: TimeSlot[],
-): { start: Date; end: Date } | null {
-    if (slotsA.length === 0 || slotsB.length === 0) return null;
+  slotsA: TimeSlot[],
+  slotsB: TimeSlot[],
+): { startTime: Date; endTime: Date } | null {
+  if (slotsA.length === 0 || slotsB.length === 0) return null;
 
-    const sortedA = [...slotsA].sort(
-        (a, b) => a.startTime.getTime() - b.startTime.getTime(),
-    );
-    const sortedB = [...slotsB].sort(
-        (a, b) => a.startTime.getTime() - b.startTime.getTime(),
-    );
+  const sortedA = [...slotsA].sort(
+    (a, b) => a.startTime.getTime() - b.startTime.getTime(),
+  );
+  const sortedB = [...slotsB].sort(
+    (a, b) => a.startTime.getTime() - b.startTime.getTime(),
+  );
 
-    let i = 0;
-    let j = 0;
+  let i = 0;
+  let j = 0;
 
-    while (i < sortedA.length && j < sortedB.length) {
-        const startA = sortedA[i].startTime;
-        const endA = sortedA[i].endTime;
-        const startB = sortedB[j].startTime;
-        const endB = sortedB[j].endTime;
+  while (i < sortedA.length && j < sortedB.length) {
+    const startA = sortedA[i].startTime;
+    const endA = sortedA[i].endTime;
+    const startB = sortedB[j].startTime;
+    const endB = sortedB[j].endTime;
 
-        const overlapStart = new Date(Math.max(startA.getTime(), startB.getTime()));
-        const overlapEnd = new Date(Math.min(endA.getTime(), endB.getTime()));
+    const overlapStart = new Date(Math.max(startA.getTime(), startB.getTime()));
+    const overlapEnd = new Date(Math.min(endA.getTime(), endB.getTime()));
 
-        if (overlapStart < overlapEnd) {
-            return { start: overlapStart, end: overlapEnd };
-        }
-
-        if (endA <= endB) {
-            i++;
-        } else {
-            j++;
-        }
+    if (overlapStart < overlapEnd) {
+      return {
+        startTime: overlapStart,
+        endTime: overlapEnd,
+      };
     }
 
-    return null;
+    if (endA <= endB) {
+      i++;
+    } else {
+      j++;
+    }
+  }
+
+  return null;
 }
