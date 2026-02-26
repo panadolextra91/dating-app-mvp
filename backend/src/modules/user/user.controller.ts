@@ -23,6 +23,11 @@ export class UserController {
     return this.userService.findAll();
   }
 
+  @Get('email/:email')
+  findByEmail(@Param('email') email: string) {
+    return this.userService.findByEmail(email);
+  }
+
   @Get(':id')
   findById(@Param('id', ParseUUIDPipe) id: string) {
     return this.userService.findById(id);

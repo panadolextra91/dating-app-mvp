@@ -18,7 +18,7 @@ export class AvailabilityController {
     return this.availabilityService.create(dto);
   }
 
-  @Get(':userId')
+  @Get('user/:userId')
   findByUserId(@Param('userId', ParseUUIDPipe) userId: string) {
     return this.availabilityService.findByUserId(userId);
   }

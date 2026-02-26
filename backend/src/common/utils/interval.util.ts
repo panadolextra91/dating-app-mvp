@@ -12,7 +12,7 @@ export interface TimeSlot {
 export function findFirstCommonSlot(
   slotsA: TimeSlot[],
   slotsB: TimeSlot[],
-): { start: Date; end: Date } | null {
+): { startTime: Date; endTime: Date } | null {
   if (slotsA.length === 0 || slotsB.length === 0) return null;
 
   const sortedA = [...slotsA].sort(
@@ -35,7 +35,10 @@ export function findFirstCommonSlot(
     const overlapEnd = new Date(Math.min(endA.getTime(), endB.getTime()));
 
     if (overlapStart < overlapEnd) {
-      return { start: overlapStart, end: overlapEnd };
+      return {
+        startTime: overlapStart,
+        endTime: overlapEnd,
+      };
     }
 
     if (endA <= endB) {

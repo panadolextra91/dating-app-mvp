@@ -138,11 +138,8 @@ describe('MatchService', () => {
       const result = await service.findCommonSlot('match-1');
 
       expect(result).toEqual({
-        matchId: 'match-1',
-        commonSlot: {
-          start: new Date('2026-03-01T10:00:00Z'),
-          end: new Date('2026-03-01T11:00:00Z'),
-        },
+        startTime: new Date('2026-03-01T10:00:00Z'),
+        endTime: new Date('2026-03-01T11:00:00Z'),
       });
     });
 
@@ -169,7 +166,7 @@ describe('MatchService', () => {
 
       const result = await service.findCommonSlot('match-1');
 
-      expect(result).toEqual({ matchId: 'match-1', commonSlot: null });
+      expect(result).toBeNull();
     });
   });
 });

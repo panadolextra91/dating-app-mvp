@@ -37,6 +37,7 @@ backend/docs
 # === Frontend (Next.js) ===
 web/.next/
 web/out/
+web/docs
 
 # === Misc ===
 *.tsbuildinfo

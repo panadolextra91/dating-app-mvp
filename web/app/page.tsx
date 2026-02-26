@@ -1,65 +1,248 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { useAppStore } from "@/store/useAppStore";
+import { api } from "@/lib/api";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Gender } from "@/lib/types";
+import { toast } from "sonner";
+
+const formSchema = z.object({
+  name: z.string().min(2, "Tên phải ít nhất 2 ký tự"),
+  email: z.string().email("Email không hợp lệ"),
+  age: z.number().min(18, "Phải trên 18 tuổi").max(120, "Già quá rồi bồ!"),
+  gender: z.enum(["MALE", "FEMALE", "OTHER"]),
+  bio: z.string().max(200, "Bio ngắn thôi bồ ơi (max 200)").optional().or(z.literal("")),
+});
+
+type FormValues = z.infer<typeof formSchema>;
 
 export default function Home() {
+  const { currentUser, login } = useAppStore();
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [loginEmail, setLoginEmail] = useState("");
+
+  useEffect(() => {
+    setMounted(true);
+    if (currentUser) {
+      router.push("/swipe");
+    }
+  }, [currentUser, router]);
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      age: 20,
+      gender: "OTHER",
+      bio: "",
+    },
+  });
+
+  async function onSubmit(values: FormValues) {
+    setLoading(true);
+    try {
+      const user = await api.createUser({
+        ...values,
+        gender: values.gender as Gender,
+        bio: values.bio || undefined,
+      });
+      if (user) {
+        login(user);
+        router.push("/swipe");
+      }
+    } catch {
+      // Error handled by api.ts toasts
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleLogin() {
+    if (!loginEmail) return;
+    setLoading(true);
+    try {
+      const user = await api.getUserByEmail(loginEmail);
+      if (user) {
+        login(user);
+        toast.success(`Chào mừng quay trở lại, ${user.name}! 🤠`);
+        router.push("/swipe");
+      }
+    } catch {
+      // Handled by api toasts
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (!mounted || currentUser) return null;
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+    <div className="container max-w-lg mx-auto py-12 px-4">
+      <Card className="neo-border neo-shadow bg-card">
+        <CardHeader className="text-center">
+          <CardTitle className="text-4xl font-black italic tracking-tight uppercase">
+            CÀ CHỚN DATING
+          </CardTitle>
+          <CardDescription className="text-lg font-bold text-foreground">
+            Bớt nghiêm túc lại, đi tìm &quot;mối nhậu&quot; thôi bồ! 🍺
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="font-black uppercase">Tên gì?</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Văn Tèo..." {...field} className="neo-border h-12 text-lg" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="font-black uppercase">Email liên lạc</FormLabel>
+                    <FormControl>
+                      <Input placeholder="teo@example.com" {...field} className="neo-border h-12 text-lg" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="age"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="font-black uppercase">Bao nhiêu tuổi?</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          {...field}
+                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                          className="neo-border h-12 text-lg"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="gender"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="font-black uppercase">Giới tính</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="neo-border h-12 text-lg">
+                            <SelectValue placeholder="Chọn giới tính" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="neo-border">
+                          <SelectItem value="MALE">Nam</SelectItem>
+                          <SelectItem value="FEMALE">Nữ</SelectItem>
+                          <SelectItem value="OTHER">Linh hoạt</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <FormField
+                control={form.control}
+                name="bio"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="font-black uppercase">Sở trường / Phốt bản thân</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Thích đi nhậu, hay ngủ gật trên bàn..."
+                        {...field}
+                        className="neo-border min-h-[100px] text-lg"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit" size="lg" className="w-full text-xl h-16" disabled={loading}>
+                {loading ? "ĐANG TẠO HỒ SƠ..." : "BẮT ĐẦU CÀ CHỚN! 🚀"}
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+
+      {/* Login Section */}
+      <Card className="neo-border neo-shadow bg-card mt-8">
+        <CardHeader>
+          <CardTitle className="text-2xl font-black uppercase italic">
+            MẸ ĐÃ CÓ TÀI KHOẢN?
+          </CardTitle>
+          <CardDescription className="text-md font-bold text-foreground">
+            Nhập email để cà chớn tiếp bồ ơi!
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-4">
+            <Input
+              placeholder="teo@example.com"
+              value={loginEmail}
+              onChange={(e) => setLoginEmail(e.target.value)}
+              className="neo-border h-14 text-lg bg-white"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+            <Button
+              onClick={handleLogin}
+              disabled={loading || !loginEmail}
+              className="h-14 px-8 text-xl"
+            >
+              {loading ? "ĐANG VÔ..." : "VÔ LUÔN! 🚀"}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

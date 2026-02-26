@@ -1,26 +1,100 @@
 @import "tailwindcss";
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@import "tw-animate-css";
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  /* === NEO-BRUTALISM MEME THEME === */
+  /* Background: Banana Yellow 24/7 — no dark mode, no mercy */
+  --color-background: #FDE047;
+  --color-foreground: #1a1a1a;
+
+  /* Primary: Electric Purple */
+  --color-primary: #A855F7;
+  --color-primary-foreground: #fff;
+
+  /* Cards: White with black borders */
+  --color-card: #fff;
+  --color-card-foreground: #1a1a1a;
+
+  /* Border: SOLID BLACK */
+  --color-border: #000;
+  --color-input: #000;
+  --color-ring: #A855F7;
+
+  /* Destructive: Red for hearts & danger */
+  --color-destructive: #EF4444;
+
+  /* Muted */
+  --color-muted: #F5F5F4;
+  --color-muted-foreground: #737373;
+
+  /* Secondary */
+  --color-secondary: #FEF9C3;
+  --color-secondary-foreground: #1a1a1a;
+
+  /* Accent: Cyan pop */
+  --color-accent: #22D3EE;
+  --color-accent-foreground: #1a1a1a;
+
+  /* Popover */
+  --color-popover: #fff;
+  --color-popover-foreground: #1a1a1a;
+
+  /* ZERO radius — sharp corners only */
+  --radius: 0px;
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-2xl: 0px;
+  --radius-3xl: 0px;
+  --radius-4xl: 0px;
+
+  /* Fonts */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* === NEO-BRUTALISM UTILITIES === */
+.neo-shadow {
+  box-shadow: 4px 4px 0px 0px #000;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.neo-shadow-sm {
+  box-shadow: 2px 2px 0px 0px #000;
+}
+
+.neo-border {
+  border: 2px solid #000;
+}
+
+.neo-btn {
+  border: 2px solid #000;
+  box-shadow: 4px 4px 0px 0px #000;
+  transition: all 0.1s ease;
+}
+
+.neo-btn:active {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+
+.neo-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 5px 5px 0px 0px #000;
+}
+
+.neo-btn:active:hover {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+
+/* === BASE STYLES === */
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
 }
