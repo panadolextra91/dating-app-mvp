@@ -35,8 +35,8 @@ describe('findFirstCommonSlot', () => {
 
     const result = findFirstCommonSlot(slotsA, slotsB);
     expect(result).toEqual({
-      start: new Date('2026-03-01T10:00:00Z'),
-      end: new Date('2026-03-01T11:00:00Z'),
+      startTime: new Date('2026-03-01T10:00:00Z'),
+      endTime: new Date('2026-03-01T11:00:00Z'),
     });
   });
 
@@ -46,8 +46,8 @@ describe('findFirstCommonSlot', () => {
 
     const result = findFirstCommonSlot(slotsA, slotsB);
     expect(result).toEqual({
-      start: new Date('2026-03-01T10:00:00Z'),
-      end: new Date('2026-03-01T12:00:00Z'),
+      startTime: new Date('2026-03-01T10:00:00Z'),
+      endTime: new Date('2026-03-01T12:00:00Z'),
     });
   });
 
@@ -57,8 +57,8 @@ describe('findFirstCommonSlot', () => {
 
     const result = findFirstCommonSlot(slotsA, slotsB);
     expect(result).toEqual({
-      start: new Date('2026-03-01T09:00:00Z'),
-      end: new Date('2026-03-01T10:00:00Z'),
+      startTime: new Date('2026-03-01T09:00:00Z'),
+      endTime: new Date('2026-03-01T10:00:00Z'),
     });
   });
 
@@ -74,8 +74,8 @@ describe('findFirstCommonSlot', () => {
 
     const result = findFirstCommonSlot(slotsA, slotsB);
     expect(result).toEqual({
-      start: new Date('2026-03-01T10:00:00Z'),
-      end: new Date('2026-03-01T11:00:00Z'),
+      startTime: new Date('2026-03-01T10:00:00Z'),
+      endTime: new Date('2026-03-01T11:00:00Z'),
     });
   });
 
@@ -91,8 +91,8 @@ describe('findFirstCommonSlot', () => {
 
     const result = findFirstCommonSlot(slotsA, slotsB);
     expect(result).toEqual({
-      start: new Date('2026-03-01T10:00:00Z'),
-      end: new Date('2026-03-01T11:00:00Z'),
+      startTime: new Date('2026-03-01T10:00:00Z'),
+      endTime: new Date('2026-03-01T11:00:00Z'),
     });
   });
 
@@ -108,8 +108,8 @@ describe('findFirstCommonSlot', () => {
 
     const result = findFirstCommonSlot(slotsA, slotsB);
     expect(result).toEqual({
-      start: new Date('2026-03-01T10:00:00Z'),
-      end: new Date('2026-03-01T11:00:00Z'),
+      startTime: new Date('2026-03-01T10:00:00Z'),
+      endTime: new Date('2026-03-01T11:00:00Z'),
     });
   });
 });
