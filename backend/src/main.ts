@@ -13,8 +13,13 @@ async function bootstrap() {
     }),
   );
 
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3002';
+  // Normalize by removing trailing slash for strict CORS origin matching
+  const origin = frontendUrl.replace(/\/$/, "");
+
   app.enableCors({
-    origin: process.env.FRONTEND_URL ?? 'http://localhost:3002',
+    origin: origin,
+    credentials: true,
   });
 
   app.enableShutdownHooks();
