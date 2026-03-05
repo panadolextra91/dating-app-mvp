@@ -312,15 +312,15 @@ flowchart LR
 
 ```mermaid
 flowchart TD
-    A[Sort slotsA, slotsB by startTime] --> B[i=0, j=0]
-    B --> C{ i < lenA && j < lenB }
-    C -->|No| Z[No common slot]
-    C -->|Yes| D[overlap = intersect(Ai, Bj)]
-    D --> E{overlap >= minDuration?}
+    A[Sort slot lists by start time] --> B[Initialize pointers i and j]
+    B --> C{Both pointers in range}
+    C -->|No| Z[No common slot found]
+    C -->|Yes| D[Compute overlap of current two slots]
+    D --> E{Overlap duration meets minimum}
     E -->|Yes| F[Return overlap]
-    E -->|No| G{Ai.end < Bj.end?}
-    G -->|Yes| H[i++]
-    G -->|No| I[j++]
+    E -->|No| G{Slot A ends earlier than Slot B}
+    G -->|Yes| H[Move pointer i]
+    G -->|No| I[Move pointer j]
     H --> C
     I --> C
 ```
